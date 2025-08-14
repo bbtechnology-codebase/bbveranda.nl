@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #5A8F3F;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background-color: #ffffff;
+  color: #111827; /* gray-900 */
+}
+
+.container-site {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
