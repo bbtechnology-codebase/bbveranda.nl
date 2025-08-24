@@ -5,6 +5,7 @@ import { useState } from 'react'
 import CookieBanner from '@/components/CookieBanner'
 import dynamic from 'next/dynamic'
 
+
 const MobileNav = dynamic(() => import('@/components/MobileNav'), { ssr: false })
 
 const PRODUCTS = [
@@ -25,7 +26,14 @@ export default function Header() {
       <CookieBanner />
 
       <div className="container-site flex h-16 items-center justify-between">
-        <Link href="/" className="font-semibold text-xl">B&B Veranda</Link>
+      <Link href="/" className="flex items-center gap-3">
+          <img
+            src="/images/BBVerandaLogo.png"  // başında / olmalı
+            alt="B&B Veranda Logo"
+            className="w-10 h-10"
+          />
+          <span className="font-semibold text-xl">B&B Veranda</span>
+        </Link>
         <div className="md:hidden">
           <MobileNav />
         </div>
