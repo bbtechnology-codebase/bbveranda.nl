@@ -1,14 +1,32 @@
 import Link from 'next/link'
+import Image from 'next/image'
+import Script from 'next/script'
 
 export default function HomePage() {
   return (
     <div>
+      <Script id="org-jsonld" type="application/ld+json" strategy="afterInteractive">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "B&B Veranda",
+          "url": process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bbveranda.nl',
+          "logo": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bbveranda.nl'}/images/BBVerandaLogo.png`
+        })}
+      </Script>
       {/* Hero Section */}
       <section className="relative min-h-[80vh] flex items-center">
-        <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-black/30 z-10"></div>
-        <div className="absolute inset-0 bg-gray-200 flex items-center justify-center text-gray-600 text-xl">
-          [Buraya veranda hero görseli/video gelecek]
+        <div className="absolute inset-0">
+          <Image
+            src="https://egveranda.nl/wp-content/uploads/2024/01/Banner-en-EG-Veranda-scaled.webp"
+            alt="EG Veranda Banner"
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
         </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-black/30 z-10"></div>
         <div className="container-site relative z-20 py-20">
           <div className="max-w-3xl">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-tight">
@@ -49,55 +67,58 @@ export default function HomePage() {
           <div className="overflow-x-auto scrollbar-hide">
             <div className="flex gap-6 min-w-max pb-4">
               {[
-                { 
-                  href: '/urunler/verandalar', 
+                {
+                  href: '/urunler/verandalar',
                   title: 'Verandalar',
                   description: 'Modern alüminyum verandalar',
-                  image: '[Veranda görseli]'
+                  imageSrc: '/images/categories/veranda.webp',
+                  imageAlt: 'Veranda'
                 },
-                { 
-                  href: '/urunler/cam-surgulu-duvarlar', 
+                {
+                  href: '/urunler/cam-surgulu-duvarlar',
                   title: 'Cam Sürgülü Duvarlar',
                   description: 'Şeffaf ve esnek çözümler',
-                  image: '[Cam duvar görseli]'
+                  imageSrc: '/images/categories/glazen-schuifwand.webp',
+                  imageAlt: 'Glazen schuifwand'
                 },
-                { 
-                  href: '/urunler/cerceveler', 
+                {
+                  href: '/urunler/cerceveler',
                   title: 'Çerçeveler',
                   description: 'Dayanıklı alüminyum çerçeveler',
-                  image: '[Çerçeve görseli]'
+                  imageSrc: '/images/categories/kozijnen.webp',
+                  imageAlt: 'Kozijnen'
                 },
-                { 
-                  href: '/urunler/ic-kapilar', 
+                {
+                  href: '/urunler/ic-kapilar',
                   title: 'İç Kapılar',
                   description: 'Modern iç mekan kapıları',
-                  image: '[Kapı görseli]'
+                  imageSrc: '/images/categories/binnendeuren.webp',
+                  imageAlt: 'Binnendeuren'
                 },
-                { 
-                  href: '/urunler/gunes-koruma', 
+                {
+                  href: '/urunler/gunes-koruma',
                   title: 'Güneş Koruması',
                   description: 'UV korumalı sistemler',
-                  image: '[Güneş koruma görseli]'
+                  imageSrc: '/images/categories/zonwering.webp',
+                  imageAlt: 'Zonwering'
                 },
-                { 
-                  href: '/urunler/louvre-catilari', 
+                {
+                  href: '/urunler/louvre-catilari',
                   title: 'Louvre Çatıları',
                   description: 'Ayarlanabilir çatı sistemleri',
-                  image: '[Louvre çatı görseli]'
-                },
-                { 
-                  href: '/urunler/bahce-odalari', 
-                  title: 'Bahçe Odaları',
-                  description: 'Tam kapalı yaşam alanları',
-                  image: '[Bahçe oda görseli]'
-                },
+                  imageSrc: '/images/categories/lamellendaken.webp',
+                  imageAlt: 'Lamellendaken'
+                }
               ].map((item) => (
                 <Link key={item.href} href={item.href} className="group w-80 shrink-0">
-                  <div className="aspect-[4/3] w-full rounded-xl bg-gray-200 flex items-center justify-center text-gray-600 mb-4 overflow-hidden">
-                    <div className="text-center">
-                      <div className="text-2xl mb-2">{item.image}</div>
-                      <div className="text-sm text-gray-500">Görsel yüklenecek</div>
-                    </div>
+                  <div className="aspect-[4/3] w-full rounded-xl bg-gray-200 mb-4 overflow-hidden relative">
+                    <Image
+                      src={item.imageSrc}
+                      alt={item.imageAlt}
+                      fill
+                      sizes="(min-width:1024px) 33vw, 80vw"
+                      className="object-cover group-hover:scale-[1.02] transition-transform"
+                    />
                   </div>
                   <div className="space-y-2">
                     <h3 className="font-semibold text-lg text-gray-900 group-hover:text-primary transition-colors">

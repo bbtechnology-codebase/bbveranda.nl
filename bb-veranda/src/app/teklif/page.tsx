@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import Turnstile from '@/components/Turnstile'
 
 const PRODUCTS = [
   { id: 'veranda', name: 'Veranda', models: ['Primeline Plus', 'R-Plus', 'Cubo Line'] },
@@ -22,6 +23,9 @@ export default function TeklifPage() {
   const [contact, setContact] = useState({ ad: '', soyad: '', email: '', telefon: '' })
   const [note, setNote] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [token, setToken] = useState<string | null>(null)
 
   const canNext1 = selectedProduct !== null
   const canNext2 = selectedModel !== ''
@@ -30,9 +34,39 @@ export default function TeklifPage() {
   function next() { setStep((s) => Math.min(4, s + 1)) }
   function prev() { setStep((s) => Math.max(1, s - 1)) }
 
-  function submit() {
-    // Placeholder submit
-    setSubmitted(true)
+  async function submit() {
+    setSubmitting(true)
+    setError(null)
+    try {
+      const payload = {
+        name: `${contact.ad} ${contact.soyad}`.trim(),
+        email: contact.email,
+        phone: contact.telefon,
+        message: [note, options?.ekOzellikler].filter(Boolean).join('\n\n') || undefined,
+        selection: {
+          model: selectedModel || 'unknown',
+          roof: (options.catiTipi || '').toLowerCase().includes('cam') ? 'glass' : 'polycarbonate',
+          glassVariant: null,
+          color: (options.renk || '').toLowerCase() || 'antrasit'
+        },
+        token,
+        provider: 'turnstile'
+      }
+      const res = await fetch('/api/teklif', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}))
+        throw new Error(j?.error || 'Gönderim başarısız')
+      }
+      setSubmitted(true)
+    } catch (e: any) {
+      setError(e?.message || 'Gönderim sırasında bir hata oluştu')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (submitted) {
@@ -280,6 +314,15 @@ export default function TeklifPage() {
                   onChange={(e) => setNote(e.target.value)}
                 />
               </div>
+              <div className="mb-6">
+                <label className="block font-medium mb-2">Güvenlik Doğrulaması</label>
+                <div className="rounded-lg border border-gray-200 p-3">
+                  <Turnstile onVerify={(t) => setToken(t)} />
+                </div>
+                {error && (
+                  <p className="text-sm text-red-600 mt-2">{error}</p>
+                )}
+              </div>
             </div>
           )}
 
@@ -305,9 +348,10 @@ export default function TeklifPage() {
               {step === 4 && (
                 <button 
                   onClick={submit} 
-                  className="px-8 py-3 rounded-lg bg-primary text-white font-medium hover:bg-primary/90"
+                  disabled={submitting || !token}
+                  className="px-8 py-3 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Teklif Gönder
+                  {submitting ? 'Gönderiliyor...' : 'Teklif Gönder'}
                 </button>
               )}
             </div>
