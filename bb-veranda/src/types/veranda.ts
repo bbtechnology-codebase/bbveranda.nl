@@ -1,3 +1,5 @@
+import manifest from '@/lib/assets-manifest.json';
+
 export type Model = 'primeline-plus' | 'r-plus' | 'cubo-line' | 'cubo-plus';
 export type Roof = 'glass' | 'polycarbonate';
 export type GlassVariant = 'type-1' | 'type-2';
@@ -38,12 +40,7 @@ export const COLOR_NAMES: Record<Color, string> = {
 };
 
 // Assets mapping for specific overrides (optional)
-export const ASSETS_MAP: Partial<Record<string, string>> = {
-  // key: `${model}__${roof}${glassVariant ? '__'+glassVariant : ''}__${color}`
-  // value: absolute public path
-  // Example:
-  // 'primeline-plus__glass__type-1__antrasit': '/products/verandas/primeline-plus/glass/type-1/antrasit.png'
-};
+export const ASSETS_MAP: Partial<Record<string, string>> = manifest as Record<string, string>;
 
 // Generate asset map key
 export function getAssetKey(selection: Selection): string {
@@ -80,39 +77,65 @@ export function getVerandaImagePath(selection: Selection): string {
     return '/products/verandas/placeholder.jpg';
   }
   
-  // Check assets map first
+  // Manifest-based resolution
   const assetKey = getAssetKey(selection);
-  if (ASSETS_MAP[assetKey]) {
-    return ASSETS_MAP[assetKey];
+  if (assetKey && ASSETS_MAP[assetKey]) {
+    return ASSETS_MAP[assetKey]!;
   }
-  
-  // Generate path based on rules
-  let path: string;
-  if (roof === 'glass') {
-    path = `/products/verandas/${model}/${roof}/${glassVariant}/${color}`;
-  } else {
-    path = `/products/verandas/${model}/${roof}/${color}`;
+
+  // Fallback: try known extensions deterministically
+  const base = roof === 'glass'
+    ? `/products/verandas/${model}/${roof}/${glassVariant}/${color}`
+    : `/products/verandas/${model}/${roof}/${color}`;
+  const candidates = [
+    `${base}.jpg`,
+    `${base}.jpeg`,
+    `${base}.png`
+  ];
+  for (const c of candidates) {
+    // We cannot probe at build-time reliably on client; return first candidate.
+    // Server will 404 if missing; UI supplies placeholder on error.
+    return c;
   }
-  
-  return path;
+  return '/products/verandas/placeholder.jpg';
 }
 
 // Get image with fallback extensions
 export async function getImageWithFallback(basePath: string): Promise<string> {
-  // Try .jpg first, then .png
   const jpgPath = `${basePath}.jpg`;
+  const jpegPath = `${basePath}.jpeg`;
   const pngPath = `${basePath}.png`;
-  
-  if (await probeImage(jpgPath)) {
-    return jpgPath;
-  }
-  
-  if (await probeImage(pngPath)) {
-    return pngPath;
-  }
-  
-  // Return placeholder if neither exists
+  if (await probeImage(jpgPath)) return jpgPath;
+  if (await probeImage(jpegPath)) return jpegPath;
+  if (await probeImage(pngPath)) return pngPath;
   return '/products/verandas/placeholder.jpg';
+}
+
+// URL encode/decode for sharing selections
+export function encodeSelection(selection: Selection): string {
+  const params = new URLSearchParams();
+  if (selection.model) params.set('m', selection.model);
+  if (selection.roof) params.set('r', selection.roof);
+  if (selection.roof === 'glass' && selection.glassVariant) params.set('g', selection.glassVariant);
+  if (selection.color) params.set('c', selection.color);
+  return params.toString();
+}
+
+export function decodeSelection(qs: string): Selection {
+  const params = new URLSearchParams(qs.startsWith('?') ? qs.slice(1) : qs);
+  const model = (params.get('m') as Model | null) ?? null;
+  const roof = (params.get('r') as Roof | null) ?? null;
+  const glassVariant = (params.get('g') as GlassVariant | null) ?? null;
+  const color = (params.get('c') as Color | null) ?? null;
+  // Enforce dependencies
+  const fixed: Selection = { model, roof, glassVariant: null, color: null };
+  if (roof === 'glass') {
+    fixed.glassVariant = glassVariant;
+  }
+  if (roof === 'polycarbonate' || (roof === 'glass' && glassVariant)) {
+    fixed.color = color;
+  }
+  return fixed;
 }
 
 // Generate alt text for image

@@ -30,6 +30,16 @@ export default function CookieBanner() {
               className="rounded-md bg-primary px-4 py-2 text-white text-sm"
               onClick={() => {
                 window.localStorage.setItem('cookie-consent', 'accepted')
+                try {
+                  if ('gtag' in window) {
+                    ;(window as any).gtag('consent', 'update', {
+                      ad_user_data: 'granted',
+                      ad_personalization: 'granted',
+                      ad_storage: 'granted',
+                      analytics_storage: 'granted'
+                    })
+                  }
+                } catch {}
                 setVisible(false)
               }}
             >

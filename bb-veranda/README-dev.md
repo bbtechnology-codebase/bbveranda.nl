@@ -1,4 +1,4 @@
-# Veranda Konfigüratör - Geliştirici Dokümantasyonu
+# B&B Veranda – Geliştirici Dokümantasyonu
 
 ## Genel Bakış
 
@@ -46,6 +46,14 @@ public/
 /products/verandas/cubo-plus/glass/type-1/siyah.jpg
 ```
 
+## Asset Manifest & Kontrol
+
+- Manifest scripti: `scripts/generate-assets-manifest.mjs` → `src/lib/assets-manifest.json`
+- `predev` ve `prebuild` sırasında otomatik çalışır.
+- Kökte `check-assets.js` ile manuel kontrol yapılabilir:
+  - `node check-assets.js`
+  - Eksik/yanlış dosya adlarını listeler
+
 ## Yeni Görsel Ekleme
 
 ### 1. Dosya Yerleştirme
@@ -54,13 +62,7 @@ public/
 - Dosya adı tam olarak slug ile eşleşmeli
 
 ### 2. Assets Map Override (Opsiyonel)
-Eğer standart dosya yolu kullanmak istemiyorsanız, `src/types/veranda.ts` dosyasındaki `ASSETS_MAP`'e ekleyebilirsiniz:
-
-```typescript
-export const ASSETS_MAP: Partial<Record<string, string>> = {
-  'primeline-plus__glass__type-1__antrasit': '/custom/path/image.jpg'
-};
-```
+Eğer standart dosya yolu kullanmak istemiyorsanız, `src/types/veranda.ts` dosyasındaki `ASSETS_MAP` manifest ile üstlenir. Gerekirse build öncesi `src/lib/assets-manifest.json` içine özel eşlemeler ekleyebilirsiniz.
 
 ## Teknik Detaylar
 
@@ -72,13 +74,54 @@ export const ASSETS_MAP: Partial<Record<string, string>> = {
 ### State Yönetimi
 - `Selection` interface ile tip güvenliği
 - Bağımlı alanlar otomatik sıfırlanır
-- Görsel yolları otomatik güncellenir
+- Görsel yolları manifest ile çözümlenir, URL ile paylaşılabilir
 
 ### Görsel Yükleme
 - Next.js Image bileşeni kullanılır
-- `.jpg` → `.png` fallback desteği
-- Hata durumunda placeholder gösterilir
+- Manifest ile doğru uzantı çözümü, hata durumunda placeholder
 - Responsive sizing
+
+## Teklif API ve Ortam Değişkenleri
+
+- `POST /api/teklif`: zod doğrulama, Resend + SMTP fallback, audit log `/.data/teklif-logs.json` (opsiyonel)
+- Bot koruması: Cloudflare Turnstile veya hCaptcha
+- `.env.local` örneği:
+
+```
+RESEND_API_KEY=
+TO_EMAIL=
+FROM_EMAIL=
+SMTP_HOST=
+SMTP_PORT=
+SMTP_USER=
+SMTP_PASS=
+
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=
+TURNSTILE_SECRET_KEY=
+# veya
+HCAPTCHA_SITE_KEY=
+HCAPTCHA_SECRET_KEY=
+
+NEXT_PUBLIC_GA_ID=
+NEXT_PUBLIC_SITE_URL=https://www.bbveranda.nl
+```
+
+## i18n
+
+- next-intl ile `/tr` varsayılan, `/nl` ikinci dil
+- Mesajlar: `messages/tr.json`, `messages/nl.json`
+- Locale middleware: `src/middleware.ts`
+
+## SEO
+
+- OG/Twitter/alternates: `app/layout.tsx`
+- `app/sitemap.ts`, `app/robots.ts`
+- JSON-LD Organization: `app/page.tsx`
+
+## Analytics & Consent
+
+- GA4 `NEXT_PUBLIC_GA_ID`
+- Consent Mode v2: `CookieBanner` kabul sonrası tam izleme, öncesinde sınırlı ölçüm
 
 ## Geliştirme
 
@@ -97,19 +140,6 @@ npm run dev
 npm run build
 npm start
 ```
-
-## Asset Kontrol Scripti
-
-Proje kök dizininde `check-assets.js` scripti bulunur:
-
-```bash
-node check-assets.js
-```
-
-Bu script:
-- Beklenen dosya yapısını kontrol eder
-- Eksik dosyaları listeler
-- Dosya formatlarını doğrular
 
 ## Sorun Giderme
 

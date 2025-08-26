@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import {
   type Model,
@@ -14,10 +15,14 @@ import {
   COLOR_NAMES,
   getVerandaImagePath,
   getImageAltText,
-  isSelectionComplete
+  isSelectionComplete,
+  encodeSelection,
+  decodeSelection
 } from '@/types/veranda'
 
 export default function VerandaConfigurator() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [selection, setSelection] = useState<Selection>({
     model: null,
     roof: null,
@@ -28,12 +33,28 @@ export default function VerandaConfigurator() {
   const [currentImagePath, setCurrentImagePath] = useState<string>('/products/verandas/placeholder.jpg')
   const [imageError, setImageError] = useState(false)
 
+  // Hydrate from URL on first render
+  useEffect(() => {
+    const qs = searchParams?.toString() ?? ''
+    if (qs) {
+      const decoded = decodeSelection(qs)
+      setSelection(decoded)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Update image when selection changes
   useEffect(() => {
     const newPath = getVerandaImagePath(selection)
     setCurrentImagePath(newPath)
     setImageError(false)
   }, [selection])
+
+  // Sync selection to URL (shallow)
+  useEffect(() => {
+    const qs = encodeSelection(selection)
+    router.replace(qs ? `?${qs}` : '?', { scroll: false })
+  }, [selection, router])
 
   // Handle selection changes
   const updateSelection = (field: keyof Selection, value: any) => {
@@ -76,7 +97,7 @@ export default function VerandaConfigurator() {
               fill
               className="object-cover"
               priority
-              sizes="(max-width: 1024px) 100vw, 50vw"
+              sizes="(min-width:1024px) 50vw, 100vw"
               onError={handleImageError}
             />
           ) : (

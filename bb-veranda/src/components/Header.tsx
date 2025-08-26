@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useState } from 'react'
 import CookieBanner from '@/components/CookieBanner'
 import dynamic from 'next/dynamic'
+// i18n temporarily disabled
+import { useEffect, useRef } from 'react'
 
 
 const MobileNav = dynamic(() => import('@/components/MobileNav'), { ssr: false })
@@ -20,6 +22,28 @@ const PRODUCTS = [
 
 export default function Header() {
   const [isProductsOpen, setIsProductsOpen] = useState(false)
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
+  const menuRef = useRef<HTMLDivElement | null>(null)
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Close on outside click and ESC
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const t = e.target as Node
+      if (!menuRef.current && !triggerRef.current) return
+      if (menuRef.current?.contains(t) || triggerRef.current?.contains(t)) return
+      setIsProductsOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsProductsOpen(false)
+    }
+    document.addEventListener('mousedown', onClick)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onClick)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [])
 
   return (
     <header className="sticky top-0 z-50 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -34,15 +58,34 @@ export default function Header() {
           />
           <span className="font-semibold text-xl">B&B Veranda</span>
         </Link>
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center gap-3">
           <MobileNav />
         </div>
         <nav className="hidden md:flex items-center gap-6 text-sm">
           {/* Ürünler Dropdown */}
-          <div className="relative">
+          <div
+            className="relative"
+            onMouseEnter={() => {
+              if (hoverTimer.current) clearTimeout(hoverTimer.current)
+              setIsProductsOpen(true)
+            }}
+            onMouseLeave={() => {
+              if (hoverTimer.current) clearTimeout(hoverTimer.current)
+              hoverTimer.current = setTimeout(() => setIsProductsOpen(false), 100)
+            }}
+            onFocus={() => setIsProductsOpen(true)}
+            onBlur={(e) => {
+              const related = e.relatedTarget as Node | null
+              if (!related || (!menuRef.current?.contains(related) && !triggerRef.current?.contains(related))) {
+                setIsProductsOpen(false)
+              }
+            }}
+          >
             <button
-              onMouseEnter={() => setIsProductsOpen(true)}
-              onMouseLeave={() => setIsProductsOpen(false)}
+              ref={triggerRef}
+              aria-haspopup="menu"
+              aria-expanded={isProductsOpen}
+              onClick={() => setIsProductsOpen(v => !v)}
               className="flex items-center gap-1 py-2 hover:text-primary transition-colors"
             >
               Ürünler
@@ -59,8 +102,9 @@ export default function Header() {
             {/* Dropdown Menu */}
             {isProductsOpen && (
               <div
-                onMouseEnter={() => setIsProductsOpen(true)}
-                onMouseLeave={() => setIsProductsOpen(false)}
+                ref={menuRef}
+                role="menu"
+                aria-label="Ürünler"
                 className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50"
               >
                 {PRODUCTS.map((product) => (
@@ -68,6 +112,7 @@ export default function Header() {
                     key={product.href}
                     href={product.href}
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors"
+                    onClick={() => setIsProductsOpen(false)}
                   >
                     {product.title}
                   </Link>
@@ -82,7 +127,9 @@ export default function Header() {
           <Link href="/blog" className="hover:text-primary transition-colors">Blog</Link>
           <Link href="/iletisim" className="hover:text-primary transition-colors">İletişim</Link>
         </nav>
-        <Link href="/teklif" className="rounded-md bg-primary px-4 py-2 text-white font-medium hover:bg-primary/90 transition-colors">Teklif İsteyin</Link>
+        <div className="hidden md:flex items-center gap-4">
+          <Link href="/teklif" className="rounded-md bg-primary px-4 py-2 text-white font-medium hover:bg-primary/90 transition-colors">Teklif İsteyin</Link>
+        </div>
       </div>
     </header>
   )
