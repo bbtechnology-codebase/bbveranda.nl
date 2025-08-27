@@ -1,47 +1,46 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import {
   type Model,
   type Roof,
-  type GlassVariant,
+  type Variant,
   type Color,
   type Selection,
   MODEL_NAMES,
   ROOF_NAMES,
-  GLASS_VARIANT_NAMES,
+  VARIANT_NAMES,
   COLOR_NAMES,
   getVerandaImagePath,
   getImageAltText,
   isSelectionComplete,
-  encodeSelection,
-  decodeSelection
+  getAvailableVariants,
+  getAvailableRoofs
 } from '@/types/veranda'
 
+const DEFAULT_SELECTION: Selection = {
+  model: 'prime-line-plus',
+  roof: 'glass',
+  variant: 'helder-glas',
+  color: 'antraciet'
+};
+
 export default function VerandaConfigurator() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [selection, setSelection] = useState<Selection>({
-    model: null,
-    roof: null,
-    glassVariant: null,
-    color: null
-  })
+  const pathname = usePathname()
+
+  // Always start with default selection (no URL persistence)
+  const [selection, setSelection] = useState<Selection>(DEFAULT_SELECTION)
 
   const [currentImagePath, setCurrentImagePath] = useState<string>('/products/verandas/placeholder.jpg')
   const [imageError, setImageError] = useState(false)
 
-  // Hydrate from URL on first render
+  // Reset selection when page is visited (pathname changes)
   useEffect(() => {
-    const qs = searchParams?.toString() ?? ''
-    if (qs) {
-      const decoded = decodeSelection(qs)
-      setSelection(decoded)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    setSelection(DEFAULT_SELECTION)
+    setImageError(false)
+  }, [pathname])
 
   // Update image when selection changes
   useEffect(() => {
@@ -50,27 +49,27 @@ export default function VerandaConfigurator() {
     setImageError(false)
   }, [selection])
 
-  // Sync selection to URL (shallow)
-  useEffect(() => {
-    const qs = encodeSelection(selection)
-    router.replace(qs ? `?${qs}` : '?', { scroll: false })
-  }, [selection, router])
+  // No URL synchronization - selections are not persisted
 
-  // Handle selection changes
+  // Handle selection changes with smart defaults
   const updateSelection = (field: keyof Selection, value: any) => {
     setSelection(prev => {
       const newSelection = { ...prev, [field]: value }
       
       // Reset dependent fields when model or roof changes
       if (field === 'model') {
-        newSelection.roof = null
-        newSelection.glassVariant = null
-        newSelection.color = null
+        // Cubo Line için sadece cam çatı seç
+        const availableRoofs = getAvailableRoofs(value as Model)
+        newSelection.roof = availableRoofs[0] || 'glass'
+        const availableVariants = getAvailableVariants(newSelection.roof)
+        newSelection.variant = availableVariants[0] || 'default'
+        newSelection.color = 'antraciet'
       } else if (field === 'roof') {
-        newSelection.glassVariant = null
-        newSelection.color = null
-      } else if (field === 'glassVariant') {
-        newSelection.color = null
+        const availableVariants = getAvailableVariants(value as Roof)
+        newSelection.variant = availableVariants[0] || 'default'
+        newSelection.color = 'antraciet'
+      } else if (field === 'variant') {
+        newSelection.color = 'antraciet'
       }
       
       return newSelection
@@ -84,6 +83,7 @@ export default function VerandaConfigurator() {
   }
 
   const isComplete = isSelectionComplete(selection)
+  const availableVariants = selection.roof ? getAvailableVariants(selection.roof) : []
 
   return (
     <div className="grid lg:grid-cols-2 gap-8">
@@ -115,7 +115,7 @@ export default function VerandaConfigurator() {
           {isComplete ? (
             <span className="text-green-600">✓ {getImageAltText(selection)}</span>
           ) : (
-            <span>Lütfen model, çatı tipi ve renk seçiniz</span>
+            <span>Lütfen model, çatı tipi, varyant ve renk seçiniz</span>
           )}
         </div>
       </div>
@@ -147,39 +147,39 @@ export default function VerandaConfigurator() {
           <div>
             <div className="font-medium text-gray-900 mb-3">Çatı Tipi</div>
             <div className="flex gap-2">
-              {Object.entries(ROOF_NAMES).map(([key, name]) => (
+              {getAvailableRoofs(selection.model).map((roof) => (
                 <button
-                  key={key}
-                  onClick={() => updateSelection('roof', key as Roof)}
+                  key={roof}
+                  onClick={() => updateSelection('roof', roof)}
                   className={`px-4 py-3 text-sm font-medium rounded-lg border transition-all ${
-                    selection.roof === key
+                    selection.roof === roof
                       ? 'border-primary bg-primary text-white shadow-sm'
                       : 'border-gray-300 text-gray-700 hover:border-primary/50 hover:bg-primary/5'
                   }`}
                 >
-                  {name}
+                  {ROOF_NAMES[roof]}
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        {/* Cam Varyantı Seçimi (sadece cam çatı seçildiğinde) */}
-        {selection.roof === 'glass' && (
+        {/* Varyant Seçimi */}
+        {selection.roof && availableVariants.length > 0 && (
           <div>
-            <div className="font-medium text-gray-900 mb-3">Cam Varyantı</div>
-            <div className="flex gap-2">
-              {Object.entries(GLASS_VARIANT_NAMES).map(([key, name]) => (
+            <div className="font-medium text-gray-900 mb-3">Varyant</div>
+            <div className="flex flex-wrap gap-2">
+              {availableVariants.map((variant) => (
                 <button
-                  key={key}
-                  onClick={() => updateSelection('glassVariant', key as GlassVariant)}
+                  key={variant}
+                  onClick={() => updateSelection('variant', variant)}
                   className={`px-4 py-3 text-sm font-medium rounded-lg border transition-all ${
-                    selection.glassVariant === key
+                    selection.variant === variant
                       ? 'border-primary bg-primary text-white shadow-sm'
                       : 'border-gray-300 text-gray-700 hover:border-primary/50 hover:bg-primary/5'
                   }`}
                 >
-                  {name}
+                  {VARIANT_NAMES[variant]}
                 </button>
               ))}
             </div>
@@ -187,7 +187,7 @@ export default function VerandaConfigurator() {
         )}
 
         {/* Renk Seçimi */}
-        {selection.roof && (selection.roof === 'polycarbonate' || selection.glassVariant) && (
+        {selection.variant && (
           <div>
             <div className="font-medium text-gray-900 mb-3">Renk</div>
             <div className="flex gap-2">
@@ -237,9 +237,7 @@ export default function VerandaConfigurator() {
               <div className="space-y-1">
                 <div>• Model: {MODEL_NAMES[selection.model!]}</div>
                 <div>• Çatı: {ROOF_NAMES[selection.roof!]}</div>
-                {selection.roof === 'glass' && (
-                  <div>• Cam Varyantı: {GLASS_VARIANT_NAMES[selection.glassVariant!]}</div>
-                )}
+                <div>• Varyant: {VARIANT_NAMES[selection.variant!]}</div>
                 <div>• Renk: {COLOR_NAMES[selection.color!]}</div>
               </div>
             </div>

@@ -1,23 +1,23 @@
 import manifest from '@/lib/assets-manifest.json';
 
-export type Model = 'primeline-plus' | 'r-plus' | 'cubo-line' | 'cubo-plus';
+export type Model = 'cubo-line' | 'diamond-line' | 'prime-line-plus' | 'prime-recht-plus';
 export type Roof = 'glass' | 'polycarbonate';
-export type GlassVariant = 'type-1' | 'type-2';
-export type Color = 'antrasit' | 'siyah' | 'beyaz';
+export type Variant = 'getint-glas' | 'helder-glas' | 'opaal-glas' | 'helder-polycarbonate' | 'opaal-polycarbonate' | 'default';
+export type Color = 'antraciet' | 'creme' | 'zwart';
 
 export interface Selection {
   model: Model | null;
   roof: Roof | null;
-  glassVariant?: GlassVariant | null;
+  variant: Variant | null;
   color: Color | null;
 }
 
 // Model display names
 export const MODEL_NAMES: Record<Model, string> = {
-  'primeline-plus': 'Primeline Plus',
-  'r-plus': 'R-Plus',
   'cubo-line': 'Cubo Line',
-  'cubo-plus': 'Cubo Plus'
+  'diamond-line': 'Diamond Line',
+  'prime-line-plus': 'Prime Line Plus',
+  'prime-recht-plus': 'Prime Recht Plus'
 };
 
 // Roof display names
@@ -26,88 +26,61 @@ export const ROOF_NAMES: Record<Roof, string> = {
   'polycarbonate': 'Polikarbonat'
 };
 
-// Glass variant display names
-export const GLASS_VARIANT_NAMES: Record<GlassVariant, string> = {
-  'type-1': 'Tip 1',
-  'type-2': 'Tip 2'
+// Variant display names
+export const VARIANT_NAMES: Record<Variant, string> = {
+  'getint-glas': 'Getint Glas',
+  'helder-glas': 'Helder Glas',
+  'opaal-glas': 'Opaal Glas',
+  'helder-polycarbonate': 'Helder Polycarbonate',
+  'opaal-polycarbonate': 'Opaal Polycarbonate',
+  'default': 'Varsayılan'
 };
 
 // Color display names
 export const COLOR_NAMES: Record<Color, string> = {
-  'antrasit': 'Antrasit',
-  'siyah': 'Siyah',
-  'beyaz': 'Beyaz'
+  'antraciet': 'Antraciet',
+  'creme': 'Creme',
+  'zwart': 'Zwart'
 };
 
-// Assets mapping for specific overrides (optional)
-export const ASSETS_MAP: Partial<Record<string, string>> = manifest as Record<string, string>;
+// Assets mapping
+export const ASSETS_MAP: Record<string, string> = manifest as Record<string, string>;
 
 // Generate asset map key
 export function getAssetKey(selection: Selection): string {
-  const { model, roof, glassVariant, color } = selection;
-  if (!model || !roof || !color) return '';
+  const { model, roof, variant, color } = selection;
+  if (!model || !roof || !variant || !color) return '';
   
-  if (roof === 'glass' && glassVariant) {
-    return `${model}__${roof}__${glassVariant}__${color}`;
-  }
-  return `${model}__${roof}__${color}`;
+  return `${model}__${roof}__${variant}__${color}`;
 }
 
-// Check if image exists (basic check)
-export async function probeImage(src: string): Promise<boolean> {
-  try {
-    const response = await fetch(src, { method: 'HEAD' });
-    return response.ok;
-  } catch {
-    return false;
-  }
-}
-
-// Get veranda image path
+// Get veranda image path with fallback logic
 export function getVerandaImagePath(selection: Selection): string {
-  const { model, roof, glassVariant, color } = selection;
+  const { model, roof, variant, color } = selection;
   
   // Check if all required fields are selected
-  if (!model || !roof || !color) {
+  if (!model || !roof || !variant || !color) {
     return '/products/verandas/placeholder.jpg';
   }
   
-  // For glass roof, glassVariant is required
-  if (roof === 'glass' && !glassVariant) {
-    return '/products/verandas/placeholder.jpg';
+  // Try exact match first
+  const exactKey = getAssetKey(selection);
+  if (ASSETS_MAP[exactKey]) {
+    return ASSETS_MAP[exactKey]!;
   }
   
-  // Manifest-based resolution
-  const assetKey = getAssetKey(selection);
-  if (assetKey && ASSETS_MAP[assetKey]) {
-    return ASSETS_MAP[assetKey]!;
-  }
-
-  // Fallback: try known extensions deterministically
-  const base = roof === 'glass'
-    ? `/products/verandas/${model}/${roof}/${glassVariant}/${color}`
-    : `/products/verandas/${model}/${roof}/${color}`;
-  const candidates = [
-    `${base}.jpg`,
-    `${base}.jpeg`,
-    `${base}.png`
+  // Try fallback keys
+  const fallbackKeys = [
+    `${model}__${roof}__default__${color}`,
+    `${model}__default__default__${color}`
   ];
-  for (const c of candidates) {
-    // We cannot probe at build-time reliably on client; return first candidate.
-    // Server will 404 if missing; UI supplies placeholder on error.
-    return c;
+  
+  for (const key of fallbackKeys) {
+    if (ASSETS_MAP[key]) {
+      return ASSETS_MAP[key]!;
+    }
   }
-  return '/products/verandas/placeholder.jpg';
-}
-
-// Get image with fallback extensions
-export async function getImageWithFallback(basePath: string): Promise<string> {
-  const jpgPath = `${basePath}.jpg`;
-  const jpegPath = `${basePath}.jpeg`;
-  const pngPath = `${basePath}.png`;
-  if (await probeImage(jpgPath)) return jpgPath;
-  if (await probeImage(jpegPath)) return jpegPath;
-  if (await probeImage(pngPath)) return pngPath;
+  
   return '/products/verandas/placeholder.jpg';
 }
 
@@ -116,7 +89,7 @@ export function encodeSelection(selection: Selection): string {
   const params = new URLSearchParams();
   if (selection.model) params.set('m', selection.model);
   if (selection.roof) params.set('r', selection.roof);
-  if (selection.roof === 'glass' && selection.glassVariant) params.set('g', selection.glassVariant);
+  if (selection.variant) params.set('v', selection.variant);
   if (selection.color) params.set('c', selection.color);
   return params.toString();
 }
@@ -125,45 +98,44 @@ export function decodeSelection(qs: string): Selection {
   const params = new URLSearchParams(qs.startsWith('?') ? qs.slice(1) : qs);
   const model = (params.get('m') as Model | null) ?? null;
   const roof = (params.get('r') as Roof | null) ?? null;
-  const glassVariant = (params.get('g') as GlassVariant | null) ?? null;
+  const variant = (params.get('v') as Variant | null) ?? null;
   const color = (params.get('c') as Color | null) ?? null;
-  // Enforce dependencies
-  const fixed: Selection = { model, roof, glassVariant: null, color: null };
-  if (roof === 'glass') {
-    fixed.glassVariant = glassVariant;
-  }
-  if (roof === 'polycarbonate' || (roof === 'glass' && glassVariant)) {
-    fixed.color = color;
-  }
-  return fixed;
+  
+  return { model, roof, variant, color };
 }
 
 // Generate alt text for image
 export function getImageAltText(selection: Selection): string {
-  const { model, roof, glassVariant, color } = selection;
+  const { model, roof, variant, color } = selection;
   
-  if (!model || !roof || !color) {
-    return 'Lütfen model, çatı tipi ve renk seçiniz';
+  if (!model || !roof || !variant || !color) {
+    return 'Lütfen model, çatı tipi, varyant ve renk seçiniz';
   }
   
-  let alt = `${MODEL_NAMES[model]} – ${ROOF_NAMES[roof]}`;
-  
-  if (roof === 'glass' && glassVariant) {
-    alt += ` ${GLASS_VARIANT_NAMES[glassVariant]}`;
-  }
-  
-  alt += ` – ${COLOR_NAMES[color]}`;
-  
-  return alt;
+  return `${MODEL_NAMES[model]} – ${ROOF_NAMES[roof]} – ${VARIANT_NAMES[variant]} – ${COLOR_NAMES[color]}`;
 }
 
 // Check if selection is complete
 export function isSelectionComplete(selection: Selection): boolean {
-  const { model, roof, glassVariant, color } = selection;
+  const { model, roof, variant, color } = selection;
   
-  if (!model || !roof || !color) return false;
-  
-  if (roof === 'glass' && !glassVariant) return false;
-  
-  return true;
+  return !!(model && roof && variant && color);
+}
+
+// Get available roof types for a given model
+export function getAvailableRoofs(model: Model): Roof[] {
+  if (model === 'cubo-line') {
+    return ['glass']; // Cubo Line sadece cam çatı destekler
+  }
+  return ['glass', 'polycarbonate']; // Diğer modeller her iki çatı tipini destekler
+}
+
+// Get available variants for a given roof type
+export function getAvailableVariants(roof: Roof): Variant[] {
+  if (roof === 'glass') {
+    return ['getint-glas', 'helder-glas', 'opaal-glas'];
+  } else if (roof === 'polycarbonate') {
+    return ['helder-polycarbonate', 'opaal-polycarbonate'];
+  }
+  return [];
 }
