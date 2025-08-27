@@ -1,57 +1,83 @@
-// scripts/generate-assets-manifest.mjs
-import { readdirSync, writeFileSync, statSync, mkdirSync } from 'fs';
-import { join, relative } from 'path';
-import { fileURLToPath } from 'url';
+// Scan public/products/verandas and build a map:
+// key:  model__{glass|polycarbonate}__{getint-glas|helder-glas|opaal-glas|helder-polycarbonate|opaal-polycarbonate|default}__{antraciet|creme|zwart}
+// val:  "/products/verandas/relative/path.ext"
 
-const ROOT = fileURLToPath(new URL('../public/products/verandas', import.meta.url));
-const OUT  = fileURLToPath(new URL('../src/lib/assets-manifest.json', import.meta.url));
-console.log('[manifest] ROOT =', ROOT)
-console.log('[manifest] OUT  =', OUT)
+import { readdirSync, statSync, writeFileSync } from 'fs';
+import { join, relative, basename } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const ROOT = join(__dirname, '../public/products/verandas');
+const OUT = join(__dirname, '../src/lib/assets-manifest.json');
+
+const extsRe = /\.(jpe?g|png)$/i;
+const colorRe = /^(antraciet|creme|zwart)/i;
 
 const map = {};
+
+function normRoof(dirName) {
+  // Some folders use "glas"; normalize to "glass"
+  return dirName === 'glas' ? 'glass' : dirName;
+}
+
+function addEntry(model, roof, variant, color, relPath) {
+  const key = `${model}__${roof}__${variant}__${color}`;
+  map[key] = `/products/verandas/${relPath.replaceAll('\\','/')}`;
+}
+
 function walk(dir) {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
     const s = statSync(p);
-    if (s.isDirectory()) walk(p);
-    else if (/\.(jpe?g|png)$/i.test(name)) {
-      const rel = relative(ROOT, p).replaceAll('\\','/');
-      const parts = rel.split('/');
-      // Expect structures:
-      // glass: [model, 'glass', 'type-x', 'color.ext'] (len 4)
-      // polycarbonate: [model, 'polycarbonate', 'color.ext'] (len 3)
-      if (parts.length < 3) continue;
-      const [model, roof] = parts;
-      if (roof !== 'glass' && roof !== 'polycarbonate') continue;
-      let key;
-      if (roof === 'glass') {
-        if (parts.length !== 4) continue;
-        const [, , variant, colorFile] = parts;
-        const color = colorFile.replace(/\.(jpe?g|png)$/i, '');
-        key = `${model}__glass__${variant}__${color}`;
-      } else {
-        if (parts.length !== 3) continue;
-        const [, , colorFile] = parts;
-        const color = colorFile.replace(/\.(jpe?g|png)$/i, '');
-        key = `${model}__${roof}__${color}`;
-      }
-      map[key] = `/products/verandas/${rel}`;
+    if (s.isDirectory()) {
+      walk(p);
+      continue;
+    }
+    if (!extsRe.test(name)) continue;
+
+    const rel = relative(ROOT, p);
+    const parts = rel.split(/\\|\//); // [model, roof|file, maybeVariant|file, file]
+    // Cases:
+    // 1) model/glass|glas/<variant>/<file>
+    // 2) model/polycarbonate/<variant>/<file>
+    // 3) model/<file> (root-level "default" photos)
+
+    if (parts.length === 4) {
+      const [model, roofRaw, variant, file] = parts;
+      const roof = normRoof(roofRaw);
+      const base = basename(file);
+      const m = base.match(colorRe);
+      if (!m) continue;
+      const color = m[1].toLowerCase();
+      addEntry(model, roof, variant, color, rel);
+      continue;
+    }
+
+    if (parts.length === 2) {
+      // root images: model/<file>  → treat as default variant (any roof)
+      const [model, file] = parts;
+      const base = basename(file);
+      const m = base.match(colorRe);
+      if (!m) continue;
+      const color = m[1].toLowerCase();
+      addEntry(model, 'default', 'default', color, rel);
+      continue;
     }
   }
 }
-walk(ROOT);
-// Ensure output directory exists
-try {
-  const outDir = OUT.slice(0, OUT.lastIndexOf('/'));
-  mkdirSync(outDir, { recursive: true });
-} catch {}
 
-try {
-  writeFileSync(OUT, JSON.stringify(map, null, 2));
-  console.log('✓ assets-manifest.json:', Object.keys(map).length, 'entries');
-} catch (err) {
-  console.error('✗ Failed to write manifest:', err);
-  process.exitCode = 1;
-}
+walk(ROOT);
+writeFileSync(OUT, JSON.stringify(map, null, 2));
+
+// Force output to console
+const entryCount = Object.keys(map).length;
+process.stdout.write(`✓ assets-manifest.json generated: ${entryCount} entries\n`);
+process.stdout.write('Sample entries:\n');
+Object.keys(map).slice(0, 3).forEach(key => {
+  process.stdout.write(`  ${key} → ${map[key]}\n`);
+});
 
 
