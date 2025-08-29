@@ -4,7 +4,9 @@ export default function IcKapilarPage() {
       <h1 className="text-3xl font-semibold">İç Kapılar</h1>
       <p className="mt-3 text-gray-600">Menteşeli ve pivot (taats) kapılar için seçenekler (placeholder).</p>
       <div className="mt-8 grid lg:grid-cols-2 gap-8">
-        <div className="aspect-video rounded bg-gray-200 flex items-center justify-center text-gray-600">[Görsel]</div>
+        <div className="aspect-video rounded overflow-hidden bg-gray-200 relative">
+          <img src="/Fotos Website/Steellook scharnierdeur.jpg" alt="İç kapı - steellook scharnier" className="absolute inset-0 w-full h-full object-cover" />
+        </div>
         <div className="space-y-4">
           <div className="font-medium">Kapı Türü</div>
           <div className="flex gap-2">

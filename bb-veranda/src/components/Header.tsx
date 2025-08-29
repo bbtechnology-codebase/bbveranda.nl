@@ -46,7 +46,7 @@ export default function Header() {
   }, [])
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <header className="sticky top-0 z-50 border-b bg-white">
       <CookieBanner />
 
       <div className="container-site flex h-16 items-center justify-between">

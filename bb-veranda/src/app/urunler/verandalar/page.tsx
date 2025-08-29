@@ -1,6 +1,16 @@
 import VerandaConfigurator from '@/components/VerandaConfigurator'
+import Image from 'next/image'
 
 export default function VerandalarPage() {
+  const exampleImages = [
+    '/Fotos Website/Prime Plus Veranda_s.png',
+    '/Fotos Website/Prime R-plus veranda_s.png',
+    '/Fotos Website/Cubo-2-1.png',
+    '/Fotos Website/Cubo-2-9.png',
+    '/Fotos Website/Cubo bovenaanzicht.png',
+    '/Fotos Website/Cubo met schuifpui TS100.png'
+  ]
+
   return (
     <div className="container-site py-12">
       <h1 className="text-3xl font-semibold">Verandalar</h1>
@@ -30,9 +40,15 @@ export default function VerandalarPage() {
 
         <h3 className="mt-8 text-xl font-semibold">Örnek Uygulamalar</h3>
         <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="aspect-video rounded bg-gray-200 flex items-center justify-center text-gray-600">
-              [Görsel]
+          {exampleImages.map((src, i) => (
+            <div key={i} className="aspect-video rounded overflow-hidden bg-gray-200 relative">
+              <Image
+                src={src}
+                alt={`Veranda örnek uygulama ${i + 1}`}
+                fill
+                sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
+                className="object-cover"
+              />
             </div>
           ))}
         </div>
