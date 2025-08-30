@@ -63,11 +63,8 @@ export default function HakkimizdaPage() {
                 </div>
               </div>
             </div>
-            <div className="aspect-[4/3] rounded-2xl bg-gray-200 flex items-center justify-center text-gray-600">
-              <div className="text-center">
-                <div className="text-2xl mb-2">[EG Veranda Logo/Showroom Görseli]</div>
-                <div className="text-sm text-gray-500">Görsel yüklenecek</div>
-              </div>
+            <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-gray-200 relative">
+              <img src="/Fotos Website/Prime Plus Veranda_s.png" alt="EG Veranda showroom" className="absolute inset-0 w-full h-full object-cover" />
             </div>
           </div>
         </div>
@@ -130,11 +127,8 @@ export default function HakkimizdaPage() {
       <section className="py-16">
         <div className="container-site">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="aspect-[4/3] rounded-2xl bg-gray-200 flex items-center justify-center text-gray-600">
-              <div className="text-center">
-                <div className="text-2xl mb-2">[Ekip/Ofis Görseli]</div>
-                <div className="text-sm text-gray-500">Görsel yüklenecek</div>
-              </div>
+            <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-gray-200 relative">
+              <img src="/Fotos Website/Cam_1.png" alt="B&B Veranda ekip" className="absolute inset-0 w-full h-full object-cover" />
             </div>
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-6">

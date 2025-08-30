@@ -8,7 +8,7 @@ const BLOG_POSTS = [
     category: 'Rehber',
     date: '2024-12-15',
     readTime: '5 dk',
-    image: '[Veranda rehber görseli]'
+    image: '/Fotos Website/Prime R-plus veranda_s.png'
   },
   {
     slug: '2025-bahce-trendleri',
@@ -17,7 +17,7 @@ const BLOG_POSTS = [
     category: 'Trendler',
     date: '2024-12-10',
     readTime: '7 dk',
-    image: '[Bahçe trend görseli]'
+    image: '/Fotos Website/Prime Plus Veranda_s.png'
   },
   {
     slug: 'montaj-sureci-adim-adim-veranda-kurulumu',
@@ -26,7 +26,7 @@ const BLOG_POSTS = [
     category: 'Süreç',
     date: '2024-12-05',
     readTime: '8 dk',
-    image: '[Montaj süreci görseli]'
+    image: '/Fotos Website/Rails_3.png'
   },
   {
     slug: 'musteri-hikayeleri-istanbul-villa-projesi',
@@ -35,7 +35,7 @@ const BLOG_POSTS = [
     category: 'Projeler',
     date: '2024-11-28',
     readTime: '6 dk',
-    image: '[Villa projesi görseli]'
+    image: '/Fotos Website/Cubo-2-1.png'
   },
   {
     slug: 'aluminyum-verandalarin-avantajlari',
@@ -44,7 +44,7 @@ const BLOG_POSTS = [
     category: 'Teknik',
     date: '2024-11-20',
     readTime: '4 dk',
-    image: '[Alüminyum avantaj görseli]'
+    image: '/Fotos Website/huis met ramen WD70T.jpg'
   },
   {
     slug: 'dort-mevsim-veranda-kullanimi',
@@ -53,7 +53,7 @@ const BLOG_POSTS = [
     category: 'Kullanım',
     date: '2024-11-15',
     readTime: '5 dk',
-    image: '[Dört mevsim görseli]'
+    image: '/Fotos Website/Cubo-2-9.png'
   },
   {
     slug: 'cam-surgulu-duvarlar-guvenlik-ve-bakim',
@@ -62,7 +62,7 @@ const BLOG_POSTS = [
     category: 'Teknik',
     date: '2024-11-10',
     readTime: '6 dk',
-    image: '[Cam duvar bakım görseli]'
+    image: '/Fotos Website/Cam_11-1.png'
   },
   {
     slug: 'eg-veranda-kalite-standartlari',
@@ -71,7 +71,7 @@ const BLOG_POSTS = [
     category: 'Kalite',
     date: '2024-11-05',
     readTime: '4 dk',
-    image: '[Kalite standartları görseli]'
+    image: '/Fotos Website/ramen voor woning WD70T (2).jpg'
   }
 ]
 
@@ -123,11 +123,8 @@ export default function BlogIndexPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-8">Öne Çıkan Yazı</h2>
             <Link href={`/blog/${BLOG_POSTS[0].slug}`} className="group">
               <div className="grid lg:grid-cols-2 gap-8 bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                <div className="aspect-[4/3] bg-gray-200 flex items-center justify-center text-gray-600">
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">{BLOG_POSTS[0].image}</div>
-                    <div className="text-sm text-gray-500">Görsel yüklenecek</div>
-                  </div>
+                <div className="aspect-[4/3] bg-gray-200 overflow-hidden relative">
+                  <img src={BLOG_POSTS[0].image} alt={BLOG_POSTS[0].title} className="absolute inset-0 w-full h-full object-cover" />
                 </div>
                 <div className="p-8 flex flex-col justify-center">
                   <div className="flex items-center gap-4 mb-4">
@@ -161,11 +158,8 @@ export default function BlogIndexPage() {
               {BLOG_POSTS.slice(1).map((post) => (
                 <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
                   <article className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="aspect-[4/3] bg-gray-200 flex items-center justify-center text-gray-600">
-                      <div className="text-center">
-                        <div className="text-xl mb-2">{post.image}</div>
-                        <div className="text-sm text-gray-500">Görsel yüklenecek</div>
-                      </div>
+                    <div className="aspect-[4/3] bg-gray-200 overflow-hidden relative">
+                      <img src={post.image} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
                     </div>
                     <div className="p-6">
                       <div className="flex items-center gap-3 mb-3">

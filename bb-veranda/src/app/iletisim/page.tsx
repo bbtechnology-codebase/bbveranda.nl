@@ -42,33 +42,10 @@ export default function IletisimPage() {
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-8">İletişim Bilgileri</h2>
               
-              {/* Map */}
-              <div className="aspect-[4/3] w-full rounded-2xl bg-gray-200 mb-8 flex items-center justify-center text-gray-600">
-                <div className="text-center">
-                  <div className="text-2xl mb-2">[Google Maps Entegrasyonu]</div>
-                  <div className="text-sm text-gray-500">Harita yüklenecek</div>
-                </div>
-              </div>
+              
 
               {/* Contact Details */}
               <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Adres</h3>
-                    <p className="text-gray-600">
-                      [B&B Veranda Adresi]<br />
-                      Mahalle, Cadde, Sokak No: X<br />
-                      İlçe/İl, Posta Kodu
-                    </p>
-                  </div>
-                </div>
-
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
                     <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,10 +72,10 @@ export default function IletisimPage() {
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">E-posta</h3>
                     <a 
-                      href="mailto:info@bbveranda.com" 
+                      href="mailto:info@bbveranda.nl" 
                       className="text-primary hover:text-primary/80 transition-colors"
                     >
-                      info@bbveranda.com
+                      info@bbveranda.nl
                     </a>
                   </div>
                 </div>

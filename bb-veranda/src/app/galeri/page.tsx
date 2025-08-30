@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import Image from 'next/image'
 
 const FILTERS = [
   { id: 'tumu', name: 'Tümü', icon: '🏠' },
@@ -19,7 +20,7 @@ const GALLERY_ITEMS = [
     title: 'Çekmeköy Modern Veranda Projesi',
     description: 'Primeline R-Plus model, 20 m² alan',
     location: 'İstanbul, Çekmeköy',
-    image: '[Veranda görseli 1]'
+    image: '/products/verandas/prime-line-plus/glass/helder-glas/antraciet_primeline_glas-helder.jpg'
   },
   {
     id: 2,
@@ -27,7 +28,7 @@ const GALLERY_ITEMS = [
     title: 'Kadıköy Bahçe Odası',
     description: 'Cam duvarlı tam kapalı yaşam alanı',
     location: 'İstanbul, Kadıköy',
-    image: '[Bahçe oda görseli 1]'
+    image: '/products/verandas/prime-line-plus/glass/getint-glas/zwart_primeline_glas-getint.jpg'
   },
   {
     id: 3,
@@ -35,7 +36,7 @@ const GALLERY_ITEMS = [
     title: 'Beşiktaş Cam Sürgülü Duvar',
     description: 'Çift ray sistem, temperli cam',
     location: 'İstanbul, Beşiktaş',
-    image: '[Cam duvar görseli 1]'
+    image: '/products/verandas/prime-recht-plus/glass/helder-glas/zwart_r-line_glas-helder.jpg'
   },
   {
     id: 4,
@@ -43,7 +44,7 @@ const GALLERY_ITEMS = [
     title: 'Sarıyer Pergola Projesi',
     description: 'Motorlu tavan sistemi, LED aydınlatma',
     location: 'İstanbul, Sarıyer',
-    image: '[Pergola görseli 1]'
+    image: '/products/verandas/cubo-line/glas/helder-glas/creme_Cubo_glas-helder.jpg'
   },
   {
     id: 5,
@@ -51,7 +52,7 @@ const GALLERY_ITEMS = [
     title: 'Ankara Villa Veranda',
     description: 'Cubo Line model, 35 m² alan',
     location: 'Ankara, Çankaya',
-    image: '[Veranda görseli 2]'
+    image: '/products/verandas/prime-recht-plus/antraciet_r-line.jpg'
   },
   {
     id: 6,
@@ -59,7 +60,7 @@ const GALLERY_ITEMS = [
     title: 'İzmir Markiz Sistemi',
     description: 'Motorlu markiz, uzaktan kumanda',
     location: 'İzmir, Karşıyaka',
-    image: '[Güneş koruma görseli 1]'
+    image: '/products/verandas/prime-line-plus/polycarbonate/helder-polycarbonate/antraciet_primeline_poly_helder.jpg'
   },
   {
     id: 7,
@@ -67,7 +68,7 @@ const GALLERY_ITEMS = [
     title: 'Bursa Louvre Çatı',
     description: 'Akıllı sistem, hava durumuna göre otomatik',
     location: 'Bursa, Nilüfer',
-    image: '[Louvre çatı görseli 1]'
+    image: '/products/verandas/prime-line-plus/glass/opaal-glas/antraciet_primeline_glas-opaal.jpg'
   },
   {
     id: 8,
@@ -75,7 +76,7 @@ const GALLERY_ITEMS = [
     title: 'Antalya Bahçe Odası',
     description: 'Ahşap duvarlı, doğal görünüm',
     location: 'Antalya, Muratpaşa',
-    image: '[Bahçe oda görseli 2]'
+    image: '/products/verandas/prime-recht-plus/zwart_r-line.jpeg'
   },
   {
     id: 9,
@@ -83,7 +84,7 @@ const GALLERY_ITEMS = [
     title: 'İstanbul Boğaz Veranda',
     description: 'Primeline Plus, boğaz manzaralı',
     location: 'İstanbul, Beykoz',
-    image: '[Veranda görseli 3]'
+    image: '/products/verandas/cubo-line/glas/getint-glas/antraciet_Cubo_glas-getint.jpg'
   },
   {
     id: 10,
@@ -91,7 +92,7 @@ const GALLERY_ITEMS = [
     title: 'Eskişehir Cam Duvar Sistemi',
     description: 'Üç ray sistem, lamine cam',
     location: 'Eskişehir, Tepebaşı',
-    image: '[Cam duvar görseli 2]'
+    image: '/products/verandas/prime-recht-plus/glass/getint-glas/creme_r-line_glas-getint.jpg'
   },
   {
     id: 11,
@@ -99,7 +100,7 @@ const GALLERY_ITEMS = [
     title: 'Muğla Villa Pergola',
     description: 'Kumaş çatı, ısıtma sistemi',
     location: 'Muğla, Bodrum',
-    image: '[Pergola görseli 2]'
+    image: '/products/verandas/prime-line-plus/glass/helder-glas/creme_primeline_glas-helder.jpg'
   },
   {
     id: 12,
@@ -107,7 +108,7 @@ const GALLERY_ITEMS = [
     title: 'Trabzon Tente Projesi',
     description: 'Çok fonksiyonlu tente sistemi',
     location: 'Trabzon, Ortahisar',
-    image: '[Güneş koruma görseli 2]'
+    image: '/products/verandas/prime-line-plus/polycarbonate/opaal-polycarbonate/creme_primeline_poly_opaal.jpg'
   }
 ]
 
@@ -165,12 +166,13 @@ export default function GaleriPage() {
                 onClick={() => setSelectedItem(item)}
               >
                 <div className="aspect-[4/3] rounded-xl bg-gray-200 overflow-hidden mb-4 relative">
-                  <div className="absolute inset-0 flex items-center justify-center text-gray-600">
-                    <div className="text-center">
-                      <div className="text-2xl mb-2">{item.image}</div>
-                      <div className="text-sm text-gray-500">Görsel yüklenecek</div>
-                    </div>
-                  </div>
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    sizes="(min-width:1024px) 25vw, 50vw"
+                    className="object-cover"
+                  />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -254,11 +256,14 @@ export default function GaleriPage() {
                 </button>
               </div>
               
-              <div className="aspect-[16/9] rounded-xl bg-gray-200 mb-6 flex items-center justify-center text-gray-600">
-                <div className="text-center">
-                  <div className="text-3xl mb-2">{selectedItem.image}</div>
-                  <div className="text-sm text-gray-500">Büyük görsel yüklenecek</div>
-                </div>
+              <div className="aspect-[16/9] rounded-xl bg-gray-200 mb-6 relative overflow-hidden">
+                <Image
+                  src={selectedItem.image}
+                  alt={selectedItem.title}
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                />
               </div>
               
               <div className="space-y-4">

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import Script from 'next/script'
+import CategorySlider from '../components/CategorySlider'
 
 export default function HomePage() {
   return (
@@ -18,8 +19,8 @@ export default function HomePage() {
       <section className="relative min-h-[80vh] flex items-center">
         <div className="absolute inset-0">
           <Image
-            src="https://egveranda.nl/wp-content/uploads/2024/01/Banner-en-EG-Veranda-scaled.webp"
-            alt="EG Veranda Banner"
+            src="/Fotos Website/Cubo-2-9.png"
+            alt="Veranda Hero"
             fill
             priority
             className="object-cover"
@@ -55,83 +56,7 @@ export default function HomePage() {
       </section>
 
       {/* Ürün Kategorileri Slider */}
-      <section className="container-site py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Ürün Kategorileri</h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            EG Veranda'nın geniş ürün yelpazesinden size en uygun çözümü seçin
-          </p>
-        </div>
-        
-        <div className="relative">
-          <div className="overflow-x-auto scrollbar-hide">
-            <div className="flex gap-6 min-w-max pb-4">
-              {[
-                {
-                  href: '/urunler/verandalar',
-                  title: 'Verandalar',
-                  description: 'Modern alüminyum verandalar',
-                  imageSrc: '/images/categories/veranda.webp',
-                  imageAlt: 'Veranda'
-                },
-                {
-                  href: '/urunler/cam-surgulu-duvarlar',
-                  title: 'Cam Sürgülü Duvarlar',
-                  description: 'Şeffaf ve esnek çözümler',
-                  imageSrc: '/images/categories/glazen-schuifwand.webp',
-                  imageAlt: 'Glazen schuifwand'
-                },
-                {
-                  href: '/urunler/cerceveler',
-                  title: 'Çerçeveler',
-                  description: 'Dayanıklı alüminyum çerçeveler',
-                  imageSrc: '/images/categories/kozijnen.webp',
-                  imageAlt: 'Kozijnen'
-                },
-                {
-                  href: '/urunler/ic-kapilar',
-                  title: 'İç Kapılar',
-                  description: 'Modern iç mekan kapıları',
-                  imageSrc: '/images/categories/binnendeuren.webp',
-                  imageAlt: 'Binnendeuren'
-                },
-                {
-                  href: '/urunler/gunes-koruma',
-                  title: 'Güneş Koruması',
-                  description: 'UV korumalı sistemler',
-                  imageSrc: '/images/categories/zonwering.webp',
-                  imageAlt: 'Zonwering'
-                },
-                {
-                  href: '/urunler/louvre-catilari',
-                  title: 'Louvre Çatıları',
-                  description: 'Ayarlanabilir çatı sistemleri',
-                  imageSrc: '/images/categories/lamellendaken.webp',
-                  imageAlt: 'Lamellendaken'
-                }
-              ].map((item) => (
-                <Link key={item.href} href={item.href} className="group w-80 shrink-0">
-                  <div className="aspect-[4/3] w-full rounded-xl bg-gray-200 mb-4 overflow-hidden relative">
-                    <Image
-                      src={item.imageSrc}
-                      alt={item.imageAlt}
-                      fill
-                      sizes="(min-width:1024px) 33vw, 80vw"
-                      className="object-cover group-hover:scale-[1.02] transition-transform"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="font-semibold text-lg text-gray-900 group-hover:text-primary transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm">{item.description}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      <CategorySlider />
 
       {/* Neden B&B Veranda */}
       <section className="bg-gray-50 py-20">
